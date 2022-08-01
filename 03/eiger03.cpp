@@ -10,66 +10,67 @@ using namespace std;
 int main(int argc, char **argv) {
 	cout << "Hello world" << endl;
 
-	if (argc < 2)
+	if (argc < 3)
 	{
-		cout << "Usage: eiger03 <filename>" << endl;
+		cout << "Usage: eiger03 <filename> <filename>" << endl;
 		exit(0);
 	}
 
 	int cfOK = -10;
-	CHUNK_FILE cf;
+	CHUNK_FILE cf1;
+	CHUNK_FILE cf2;
 	// string strFilename = argv[1];
 
-	cfOK = retrieveChunkFile(argv[1], cf);
+	cfOK = retrieveChunkFile(argv[1], cf1);
 
 	if (0 != cfOK)
 	{
-		cout << "Could not read buffer" << endl;
+		cout << "Could not read buffer #1" << endl;
 
 		return cfOK;
 	}
 
-	cout << "cf.len: " << cf.len << endl;
-	cout << "cf Filename: " << cf.filename << endl;
-	cout << "cf Data:" << endl << cf.buffer << endl;
+	cout << "cf1.len: " << cf1.len << endl;
+	cout << "cf1 Filename: " << cf1.filename << endl;
+	// cout << "cf1 Data:" << endl << cf1.buffer << endl;
 
-	uint lenLeft = cf.len;
-	uint chPointer = 0;
-
-	while (lenLeft > 0)
-	{
-		CHUNK ch;
-
-		if (lenLeft >= CHUNK_MAX_SIZE)
-		{
-			ch.len = CHUNK_MAX_SIZE;
-			lenLeft -= CHUNK_MAX_SIZE;
-		}
-		else
-		{
-			ch.len = lenLeft;
-			lenLeft = 0;
-		}
-
-		ch.data = new unsigned char[ch.len];
-
-		cout << "while #1, chPointer: " << chPointer << endl;
-		cout << "while #2, ch.len: " << ch.len << endl;
-
-		memcpy(ch.data, cf.buffer + chPointer, ch.len);
-
-		cf.chunkList.push_back(ch);
-
-		chPointer += ch.len;
-	}
-
+	makeChunks(cf1.buffer, cf1.len, cf1.chunkList);
 	cout << "main #1" << endl;
 
-	delete [] cf.buffer;
+	delete [] cf1.buffer;
+
+	cfOK = retrieveChunkFile(argv[2], cf2);
+
+	if (0 != cfOK)
+	{
+		cout << "Could not read buffer #2" << endl;
+
+		return cfOK;
+	}
+
+	cout << "cf2.len: " << cf2.len << endl;
+	cout << "cf2 Filename: " << cf2.filename << endl;
+	// cout << "cf2 Data:" << endl << cf2.buffer << endl;
+
+	makeChunks(cf2.buffer, cf2.len, cf2.chunkList);
+
+	delete [] cf2.buffer;
 
 	cout << "main #2" << endl;
 
-	for (list<CHUNK>::iterator it = cf.chunkList.begin(); it != cf.chunkList.end(); ++it)
+	iterateChunks(cf1.chunkList);
+	iterateChunks(cf2.chunkList);
+
+	cout << "THE END" << endl;
+
+	return 0;
+}
+
+int iterateChunks(list<CHUNK> & pchlist)
+{
+	cout << "iterateChunks START" << endl;
+
+	for (list<CHUNK>::iterator it = pchlist.begin(); it != pchlist.end(); ++it)
 	{
 		// unsigned char outData[CHUNK_MAX_SIZE + 1];
 		unsigned char outData[(*it).len + 1];
@@ -97,7 +98,46 @@ int main(int argc, char **argv) {
 	    delete [] (*it).data;
 	}
 
-	cout << "THE END" << endl;
+	cout << "iterateChunks END" << endl;
+
+	return 0;
+}
+
+int makeChunks(char * pfrom, size_t pfromlen, list<CHUNK> & pchlist)
+{
+	cout << "makeChunks START" << endl;
+
+	uint lenLeft = pfromlen;
+	uint chPointer = 0;
+
+	while (lenLeft > 0)
+	{
+		CHUNK ch;
+
+		if (lenLeft >= CHUNK_MAX_SIZE)
+		{
+			ch.len = CHUNK_MAX_SIZE;
+			lenLeft -= CHUNK_MAX_SIZE;
+		}
+		else
+		{
+			ch.len = lenLeft;
+			lenLeft = 0;
+		}
+
+		ch.data = new unsigned char[ch.len];
+
+		cout << "while #1, chPointer: " << chPointer << endl;
+		cout << "while #2, ch.len: " << ch.len << endl;
+
+		memcpy(ch.data, pfrom + chPointer, ch.len);
+
+		pchlist.push_back(ch);
+
+		chPointer += ch.len;
+	}
+
+	cout << "makeChunks END" << endl;
 
 	return 0;
 }
@@ -141,7 +181,7 @@ int calculateRollingHash(unsigned char * pdata, uint pdatalen, uint & prhash, ui
 
 	H = H % m;
 
-	for (uint i = 0; i + pwinsize < pdatalen; i++)
+	for (uint i = 1; i + pwinsize < pdatalen; i++)
 	{
 		H = (H / p) - (((uint) (pdata[i] * pow(p, 0))) % m) + (((uint) (pdata[i + pwinsize] * pow(p, pwinsize))) % m);
 		H = H % m;
