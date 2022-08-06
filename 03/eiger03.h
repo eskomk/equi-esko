@@ -17,6 +17,8 @@ using namespace std;
 int retrieveChunkFile(string pfilename, CHUNK_FILE & pcf);
 int calculateRollingHash(unsigned char * pdata, uint pdatalen, uint & prhash, uint pwinsize = 10);
 int makeChunks(char * pfrom, size_t pfromlen, list<CHUNK> & pchlist);
-int iterateChunks(list<CHUNK> & pchlist);
+int iterateChunksForRH(list<CHUNK> & pchlist);
+int scanChunks(list<CHUNK> pchl1, list<CHUNK> pchl2, list<CHUNK> & pchlres);
+int iterateAndDeleteChunkBuffer(list<CHUNK> & pchlist);
 
 #endif /* EIGER03_H_ */

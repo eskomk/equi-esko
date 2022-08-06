@@ -58,17 +58,56 @@ int main(int argc, char **argv) {
 
 	cout << "main #2" << endl;
 
-	iterateChunks(cf1.chunkList);
-	iterateChunks(cf2.chunkList);
+	list<CHUNK> resList;
 
-	cout << "THE END" << endl;
+	iterateChunksForRH(cf1.chunkList);
+	iterateChunksForRH(cf2.chunkList);
+
+	cout << "main #3" << endl;
+
+	// iterateChunks(resList);
+
+	scanChunks(cf1.chunkList, cf2.chunkList, resList);
+
+	cout << "main #4" << endl;
+
+	iterateChunksForRH(resList);
+
+	iterateAndDeleteChunkBuffer(cf1.chunkList);
+	iterateAndDeleteChunkBuffer(cf2.chunkList);
+
+	// iterateChunksForRH(resList);
+
+	cout << "THE END, joko nyt taas payday ?" << endl;
 
 	return 0;
 }
 
-int iterateChunks(list<CHUNK> & pchlist)
+int scanChunks(list<CHUNK> pchl1, list<CHUNK> pchl2, list<CHUNK> & pchlres)
 {
-	cout << "iterateChunks START" << endl;
+	for (list<CHUNK>::iterator it2 = pchl2.begin(); it2 != pchl2.end(); ++it2)
+	{
+		for (list<CHUNK>::iterator it1 = pchl1.begin(); it1 != pchl1.end(); ++it1)
+		{
+			cout << "Res up: hash 1: " << (*it1).hash << endl;
+
+			if ((*it2).hash == (*it1).hash)
+			{
+				pchlres.push_back((*it1));
+
+				cout << "Res: hash 1: " << (*it1).hash << endl;
+				cout << "Res: hash 2: " << (*it2).hash << endl;
+			}
+		}
+	}
+
+	return 0;
+}
+
+
+int iterateChunksForRH(list<CHUNK> & pchlist)
+{
+	cout << "iterateChunksForRH START" << endl;
 
 	for (list<CHUNK>::iterator it = pchlist.begin(); it != pchlist.end(); ++it)
 	{
@@ -77,6 +116,8 @@ int iterateChunks(list<CHUNK> & pchlist)
 
 		memcpy(outData, (*it).data, (*it).len);
 		outData[(*it).len] = 0;
+
+		cout << "(*it).len: " << (*it).len << endl;
 
 	    // cout << "data: " << (*it).data << endl;
 		cout << "outData: " << outData << endl;
@@ -88,17 +129,28 @@ int iterateChunks(list<CHUNK> & pchlist)
 
 		if (0 == calcOK)
 		{
-			cout << "Hash: " << aHash << endl;
+			(*it).hash = aHash;
+			cout << "Hash iter: " << (*it).hash << endl;
 		}
 		else
 		{
 			cout << "Hash NOT OK, return value: " << calcOK << endl;
 		}
 
-	    delete [] (*it).data;
+	    // delete [] (*it).data;
 	}
 
-	cout << "iterateChunks END" << endl;
+	cout << "iterateChunksForRH END" << endl;
+
+	return 0;
+}
+
+int iterateAndDeleteChunkBuffer(list<CHUNK> & pchlist)
+{
+	for (list<CHUNK>::iterator it = pchlist.begin(); it != pchlist.end(); ++it)
+	{
+		delete [] (*it).data;
+	}
 
 	return 0;
 }
@@ -232,7 +284,6 @@ int retrieveChunkFile(string pfilename, CHUNK_FILE & pcf)
 	cout << "#2" << endl;
 
 	delete [] buffer01;
-	// delete pbuf01;
 	file01.close();
 
 	return 0;

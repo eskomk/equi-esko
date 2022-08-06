@@ -17,8 +17,9 @@ uint CHUNK_MAX_SIZE = 100;
 typedef struct CHUNK_STRUCT
 {
 	uint id;
-	size_t len;
-	unsigned char * data;
+	size_t len = 0;
+	unsigned char * data = nullptr;
+	uint hash;
 } CHUNK;
 
 typedef struct CHUNK_FILE_STRUCT
