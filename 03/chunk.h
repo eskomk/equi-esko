@@ -9,6 +9,7 @@
 #define CHUNK_H_
 
 #include <list>
+#include <vector>
 
 using namespace std;
 
