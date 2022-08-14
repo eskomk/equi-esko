@@ -14,7 +14,7 @@ After subsequent build runs, you can leave -GNinja flag out:
 
 - cmake -S<path_to_source> -B<path_to_desired_build_dir>
 
-There will be teo executables:
+There will be two executables:
 
 - eiger03
 	- Standalone app
@@ -22,7 +22,7 @@ There will be teo executables:
 - eiger_test
 	- For eunning test cases
 
-Both produce print info for debugging at the moment
+Both produce print info for debugging quite a lot at the moment
 
 ## Running eiger03
 
