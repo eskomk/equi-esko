@@ -1,4 +1,4 @@
-# Rolling hash file delta
+# Produce file delta using rolling hash
 
 You need cmake and ninja or other build system installed.
 
@@ -35,3 +35,7 @@ App needs three parameters:
 ## Tests
 
 Just run eiger_test
+
+## Note
+
+- I did not use smart pointers for chunk buffer stuff, shared_pointer namely. I was too busy copying char buffers around to remember smartpointers ... 
