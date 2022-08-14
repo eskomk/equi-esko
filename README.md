@@ -20,7 +20,7 @@ There will be two executables:
 	- Standalone app
 
 - eiger_test
-	- For eunning test cases
+	- For running test cases
 
 Both produce print info for debugging quite a lot at the moment
 
@@ -39,3 +39,4 @@ Just run eiger_test
 ## Note
 
 - I did not use smart pointers for chunk buffer stuff, shared_pointer namely. I was too busy copying char buffers around to remember smartpointers ... 
+- Class Eiger has no other member variables but one at the moment. The lists could be put as members, but I kinda like that things are visible as function arguments.
