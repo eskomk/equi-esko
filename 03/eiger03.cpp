@@ -12,9 +12,9 @@ using namespace std;
 int main(int argc, char **argv) {
 	cout << "Hello world" << endl;
 
-	if (argc < 3)
+	if (argc < 4)
 	{
-		cout << "Usage: eiger03 <filename> <filename>" << endl;
+		cout << "Usage: eiger03 <filename> <filename> <deltafilename>" << endl;
 		exit(0);
 	}
 
@@ -22,9 +22,14 @@ int main(int argc, char **argv) {
 
 	Eiger theEig;
 
+	// retval = theEig.runThings(
+	// 		"/home/esko02/eclipse-workspace/eiger02/build/default/compile_commands.json",
+	// 		"/home/esko02/eclipse-workspace/eiger03/build/default/kissa.txt");
+
 	retval = theEig.runThings(
-			"/home/esko02/eclipse-workspace/eiger02/build/default/compile_commands.json",
-			"/home/esko02/eclipse-workspace/eiger03/build/default/kissa.txt");
+			argv[1],
+			argv[2],
+			argv[3]);
 
 	return retval;
 }

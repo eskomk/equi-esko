@@ -26,7 +26,7 @@ Eiger::~Eiger() {
 	// TODO Auto-generated destructor stub
 }
 
-int Eiger::runThings(string pfile1, string pfile2)
+int Eiger::runThings(string pfile1, string pfile2, string pdeltafile)
 {
 	int cfOK = -10;
 	CHUNK_FILE cf1;
@@ -83,10 +83,11 @@ int Eiger::runThings(string pfile1, string pfile2)
 	vector<CHUNK> vcf1(cf1.chunkList.begin(), cf1.chunkList.end());
 	vector<CHUNK> vcf2(cf2.chunkList.begin(), cf2.chunkList.end());
 
-	// this->composeDelta(cf1.chunkList, cf2.chunkList, deltaList);
 	this->composeDelta(vcf1, vcf2, deltaList);
 
 	cout << "main #4" << endl;
+
+	this->writeDeltaFile(pdeltafile, deltaList, cf2.chunkList);
 
 	this->iterateChunkListHashes(cf1.chunkList);
 	this->iterateChunkListHashes(cf2.chunkList);
@@ -105,6 +106,66 @@ int Eiger::runThings(string pfile1, string pfile2)
 
 	return 0;
 }
+
+int Eiger::writeDeltaFile(string pfilename, list<DELTA> pdlist, list<CHUNK> pclist)
+{
+	cout << "writeDeltaFile START" << endl;
+
+	ofstream file01;
+	bad_alloc ba;
+
+	try
+	{
+		file01.open(pfilename, fstream::binary | fstream::out);
+	}
+	catch (bad_alloc & ba)
+	{
+		cout << "ba: " << ba.what() << endl;
+		cout << "Bad filename: " << pfilename << endl;
+
+		return -1;
+	}
+
+	cout << "sizeof(DeltaWhich::Update): " << sizeof(DeltaWhich::Update) << endl;
+	cout << "sizeof(CHUNK::hash): " << sizeof(CHUNK::hash) << endl;
+	cout << "sizeof(CHUNK::len): " << sizeof(CHUNK::len) << endl;
+
+	for (DELTA d : pdlist)
+	{
+		if (d.which == DeltaWhich::Update)
+		{
+			for (CHUNK c : pclist)
+			{
+				if (c.hash == d.hash)
+				{
+					file01.write((char *) & c.which, sizeof(DeltaWhich::Update));
+					file01.write((char *) & c.hash, sizeof(CHUNK::hash));
+					file01.write((char *) & c.len, sizeof(CHUNK::len));
+					file01.write((char *) & c.data, c.len);
+				}
+			}
+		}
+		else
+		{
+			file01.write((char *) & d.which, sizeof(DeltaWhich::Orig));
+			file01.write((char *) & d.hash, sizeof(DELTA::hash));
+		}
+	}
+
+	file01.close();
+
+	if (!file01.good())
+	{
+		cout << "Error writing delta file" << endl;
+
+		return -2;
+	}
+
+	cout << "writeDeltaFile END" << endl;
+
+	return 0;
+}
+
 
 int Eiger::iterateDelta(list<DELTA> pdelta)
 {
@@ -172,34 +233,25 @@ int Eiger::composeDelta(vector<CHUNK> pchl1, vector<CHUNK> pchl2, list<DELTA> & 
 	cout << "Size1: " << size1 << endl;
 	cout << "Size2: " << size2 << endl;
 
-	// for (list<CHUNK>::iterator it2 = pchl2.begin(); it2 != pchl2.end(); it2++)
 	for (uint i2 = 0; i2 < size2; i2++)
 	{
-		// for (list<CHUNK>::iterator it1 = pchl1.begin(); it1 != pchl1.end(); it1++)
 		for (uint i1 = 0; i1 < size1; i1++)
 		{
-			// if ((*it2).hash == (*it1).hash)
 			if (pchl2[i2].hash == pchl1[i1].hash)
 			{
-				// DELTA aDelta((*it1).which, (*it1).hash);
 				DELTA aDelta((pchl1[i1]).which, (pchl1[i1]).hash);
 
 				preshashes.push_back(aDelta);
 
 				bool it1StuffEnded = false;
 
-				// while (it2 != pchl2.end() && it1 != pchl1.end())
 				while (i2 < size2 && i1 < size1)
 				{
-					// it2++;
-					// it1++;
 					i2++;
 					i1++;
 
-					// if ((*it2).hash == (*it1).hash)
 					if (pchl2[i2].hash == pchl1[i1].hash)
 					{
-						// DELTA bDelta((*it1).which, (*it1).hash);
 						DELTA bDelta(pchl1[i1].which, pchl1[i1].hash);
 						preshashes.push_back(bDelta);
 					}
@@ -207,64 +259,17 @@ int Eiger::composeDelta(vector<CHUNK> pchl1, vector<CHUNK> pchl2, list<DELTA> & 
 					{
 						break;
 					}
-
-					/*
-					if ((*it2).hash == (*it1).hash)
-					{
-						preshashes.push_back(0);
-					}
-					else
-					{
-						it1StuffEnded = true;
-
-						// preshashes.push_back((*it1).hash);
-						// preshashes.push_back((*it2).hash);
-
-						break;
-					}
-					*/
 				}
 			}
 		}
 
-		// if (it2 != pchl2.end())
 		if (i2 < size2)
 		{
-			// DELTA cDelta((*it2).which, (*it2).hash);
 			DELTA cDelta(pchl2[i2].which, pchl2[i2].hash);
 
 			preshashes.push_back(cDelta);
 		}
 	}
-
-	/*
-	for (list<CHUNK>::iterator it1 = pchl1.begin(); it1 != pchl1.end(); ++it1)
-	{
-		pchlres.push_back((*it1));
-	}
-
-	for (list<CHUNK>::iterator itRes = pchlres.begin(); itRes != pchlres.end(); ++itRes)
-	{
-		for (list<CHUNK>::iterator it2 = pchl2.begin(); it2 != pchl2.end(); ++it2)
-		{
-			if ((*itRes).hash == (*it2).hash)
-			{
-				(*it2).isInRes = true;
-
-				break;
-			}
-		}
-	}
-
-	for (list<CHUNK>::iterator it2 = pchl2.begin(); it2 != pchl2.end(); ++it2)
-	{
-		if (!(*it2).isInRes)
-		{
-			pchlres.push_back((*it2));
-		}
-	}
-
-	*/
 
 	cout << "composeDelta END" << endl;
 
@@ -438,7 +443,6 @@ int Eiger::calculateRollingHash(unsigned char * pdata, uint pdatalen, unsigned l
 	for (uint k = 0; k < pwinsize; k++)
 	{
 		p0_pow = (p0_pow * p) % m;
-		// H += ((uint) ((pdata[k] + 1) * pow(p, k))) % m;
 		H += (((pdata[k] + 1) * p0_pow)) % m;
 
 		// cout << (pdata[k] + 1) << " pow: " << p0_pow << " H: " << H << endl;
@@ -459,8 +463,6 @@ int Eiger::calculateRollingHash(unsigned char * pdata, uint pdatalen, unsigned l
 	for (uint i = 1; i + pwinsize < pdatalen; i++)
 	{
 		p1_pow *= p;
-		// H = (H / p) - (((uint) ((pdata[i] + 1) * pow(p, 1))) % m) + (((uint) ((pdata[i + pwinsize] + 1) * pow(p, pwinsize))) % m);
-		// H = (H / p) - ((((pdata[i] + 1) * p1_pow)) % m) + ((((pdata[i + pwinsize] + 1) * p1_pow_winsize)) % m);
 		H = H - ((((pdata[i] + 1) * p1_pow)) % m) + ((((pdata[i + pwinsize] + 1) * p1_pow_winsize)) % m);
 		H = H % m;
 

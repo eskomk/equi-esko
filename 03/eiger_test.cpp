@@ -1,5 +1,5 @@
 /*
- * hello_test.cpp
+ * eiger_test.cpp
  *
  *  Created on: Aug 7, 2022
  *      Author: esko02
@@ -9,8 +9,6 @@
 #include <list>
 
 #include "eiger03.h"
-
-// extern uint CHUNK_MAX_SIZE_EIGER;
 
 using namespace std;
 
@@ -39,7 +37,7 @@ protected:
 
 };
 
-TEST(EigerTest, DISABLED_TestBasicThingsTest)
+TEST(EigerTest, TestBasicThingsTest)
 {
 	unsigned char cArr[] = {'h','e','l','l','o',' ','w','o','r','l','d'};
 
@@ -101,14 +99,12 @@ TEST(EigerTest, TestCharArray12Zeros)
 
 	cout << "Actual value: " << actualVal << endl;
 
-	// EXPECT_EQ(0, actualVal);
-
 	EXPECT_EQ(0, retval);
 
 	aEiger.iterateAndDeleteChunkBuffer(chList);
 }
 
-TEST(EigerTest, calculateCompareRollingHash01)
+TEST(EigerTest, TestCompareCalculatedRollingHashes01)
 {
 	unsigned char cArr1[] = " which uses the rolling hash described below. Another popular";
 	unsigned char cArr2[] = " which Uses the rolling hash described below. Another popular";
@@ -135,7 +131,7 @@ TEST(EigerTest, calculateCompareRollingHash01)
 	EXPECT_NE(hash1, hash2);
 }
 
-TEST(EigerTest, calculateCompareRollingHash02)
+TEST(EigerTest, TestCompareCalculatedRollingHashes02)
 {
 	unsigned char cArr1[] = " which uses the rolling ha";
 	unsigned char cArr2[] = " which Uses the rolling ha";
@@ -167,7 +163,7 @@ TEST(EigerTest, calculateCompareRollingHash02)
 	EXPECT_NE(hash1, hash2);
 }
 
-TEST(EigerTest, calculateCompareRollingHash03)
+TEST(EigerTest, TestCompareCalculatedRollingHashes03)
 {
 	unsigned char cArr1[] = " which uses the rolling h";
 	unsigned char cArr2[] = " which uses the Rolling h";
@@ -200,7 +196,12 @@ TEST(EigerTest, calculateCompareRollingHash03)
 }
 
 
-TEST_F(EigerTestFixture, TestArraysAreNotEquals01)
+/**
+ * This test case does the things what standalone app does, excluding file handling.
+ * Prints out a delta of chunked arrays.
+ * There are only assertions of return values of used functions.
+ */
+TEST_F(EigerTestFixture, TestOverallFunctionality01)
 {
 	unsigned char cArr1[] = "A rolling hash (also known as recursive hashing or rolling"\
 			" checksum) is a hash function where the input is hashed in a window"\
@@ -281,7 +282,7 @@ TEST_F(EigerTestFixture, TestArraysAreNotEquals01)
 }
 
 
-TEST(EigerTest, DISABLED_CharArray10ZerosAndOne1)
+TEST(EigerTest, TestCharArray10ZerosAndOne1)
 {
 	unsigned char cArr[] = {1,0,0,0,0,0,0,0,0,0,0};
 
@@ -303,33 +304,22 @@ TEST(EigerTest, DISABLED_CharArray10ZerosAndOne1)
 
 	EXPECT_EQ(0, retval);
 
-	int counter = 0;
 	uint actualVal = 9999;
 
-	for (list<CHUNK>::iterator it = chList.begin(); it != chList.end(); it++)
-	{
-		if (0 == counter)
-		{
-			EXPECT_EQ(0, (*it).hash);
+	auto itauto = chList.begin();
 
-			actualVal = (*it).hash;
-		}
-
-		cout << "Counter: " << counter << endl;
-
-		counter++;
-	}
+	actualVal = (*itauto).hash;
 
 	cout << "Actual value: " << actualVal << endl;
 
-	EXPECT_EQ(0, actualVal);
+	EXPECT_NE(0, actualVal);
 
 	EXPECT_EQ(0, retval);
 
 	aEiger.iterateAndDeleteChunkBuffer(chList);
 }
 
-TEST(EigerTest, DISABLED_CharArray11ZerosAndOne1)
+TEST(EigerTest, TestCharArray11ZerosAndOne1)
 {
 	unsigned char cArr[] = {1,0,0,0,0,0,0,0,0,0,0,0};
 
@@ -351,26 +341,15 @@ TEST(EigerTest, DISABLED_CharArray11ZerosAndOne1)
 
 	EXPECT_EQ(0, retval);
 
-	int counter = 0;
 	uint actualVal = 9999;
 
-	for (list<CHUNK>::iterator it = chList.begin(); it != chList.end(); it++)
-	{
-		if (0 == counter)
-		{
-			EXPECT_EQ(0, (*it).hash);
+	auto itauto = chList.begin();
 
-			actualVal = (*it).hash;
-		}
-
-		cout << "Counter: " << counter << endl;
-
-		counter++;
-	}
+	actualVal = (*itauto).hash;
 
 	cout << "Actual value: " << actualVal << endl;
 
-	EXPECT_EQ(0, actualVal);
+	EXPECT_NE(0, actualVal);
 
 	EXPECT_EQ(0, retval);
 
